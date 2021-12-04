@@ -4,4 +4,45 @@
   padding: 0;
 }
 
-// TODO
+:root {
+  --bg: #282c34;
+  --text-title: #f8f8f8;
+  --text-info: #bbbbbb;
+  --text-content: #d7d7d7;
+  --text-pink: #ff57b2;
+}
+
+body {
+  background: var(--bg);
+}
+
+@media (max-width: 1080px) {
+  // tamanho de Ipad
+  html {
+    font-size: 93.75%;
+  }
+}
+
+@media (max-width: 720px) {
+  // tamanho mobile
+  html {
+    font-size: 87.5%;
+  }
+}
+
+body,
+input,
+textarea,
+select,
+button {
+  font-family: 'Inter';
+}
+
+button {
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}

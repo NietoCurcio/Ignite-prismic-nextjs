@@ -1,1 +1,39 @@
-// TODO
+.homeContainer {
+  padding: 1.5rem;
+
+  a {
+    display: block;
+
+    h2 {
+      font-weight: bold;
+      color: var(--text-title);
+
+      & + p {
+        padding-top: 0.5rem;
+        padding-bottom: 2.5rem;
+        color: var(--text-content);
+      }
+    }
+
+    > div {
+      display: flex;
+      gap: 1rem;
+      color: var(--text-info);
+    }
+
+    & + a {
+      margin-top: 3rem;
+    }
+  }
+
+  button {
+    display: inline-block;
+    margin-top: 4rem;
+    background: none;
+    border: none;
+    color: var(--text-pink);
+    font-weight: 600;
+    line-height: 1.5rem;
+    font-size: 1rem;
+  }
+}
