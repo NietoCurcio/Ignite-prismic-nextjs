@@ -1,8 +1,12 @@
-# Criando-um-projeto-do-zero
+# Prismic API & Figma
+
+<p align="center">
+  <img src="./.github/image1.png" height="500" alt="spacetravelling">
+</p>
 
 ## Prismic Headless CMS
 
-O app pega os dados dos posts da API do Prismic
+O app realiza uma requisição para a API do Prismic para carregar os posts e verificar se existe uma próxima paginação de posts.
 
 ## Figma
 
