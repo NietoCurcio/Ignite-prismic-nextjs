@@ -53,7 +53,19 @@ export default function Post({ post }: PostProps) {
               </p>
               <p>{post.data.author}</p>
               <p>
-                <FaRegClock /> 4 min
+                <FaRegClock />{' '}
+                {Math.ceil(
+                  post.data.content.reduce((total, content) => {
+                    total += content.body.reduce(
+                      (total, paragraph) =>
+                        (total += paragraph.text.match(/\S+\s*/g).length),
+                      0
+                    );
+                    return total;
+                  }, 0) / 200
+                )}{' '}
+                {/* count the number of words in post and divide by 200 */}
+                min
               </p>
             </div>
             <div className={styles.content}>
@@ -94,8 +106,6 @@ export const getStaticPaths: GetStaticPaths = async () => {
 export const getStaticProps: GetStaticProps = async ({ params: { slug } }) => {
   const prismic = getPrismicClient();
   const response = await prismic.getByUID('posts', String(slug), {});
-
-  console.log(response.data.content);
 
   const post = {
     uid: response.uid,
