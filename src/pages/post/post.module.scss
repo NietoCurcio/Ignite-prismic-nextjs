@@ -1,1 +1,45 @@
-// TODO
+.container {
+  img {
+    height: 400px;
+    width: 100%;
+    object-fit: cover;
+  }
+
+  .article {
+    h1 {
+      font-size: 3rem;
+    }
+
+    h2 {
+      font-size: 2rem;
+    }
+
+    h1 + div {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+
+      p:last-child {
+        display: flex;
+        align-items: center;
+      }
+    }
+
+    h1,
+    h2 {
+      color: var(--text-title);
+      padding: 2.5rem 0;
+    }
+
+    p {
+      color: var(--text-info);
+    }
+  }
+
+  .content {
+    p {
+      padding: 0.5rem 0;
+      text-align: justify;
+    }
+  }
+}

@@ -8,6 +8,8 @@ import commonStyles from '../styles/common.module.scss';
 import styles from './home.module.scss';
 import { FaUser, FaCalendar, FaRegCalendar, FaRegUser } from 'react-icons/fa';
 import { useState } from 'react';
+import { format } from 'date-fns';
+import ptBR from 'date-fns/locale/pt-BR';
 
 interface Post {
   uid?: string;
@@ -32,7 +34,11 @@ function parseData(postsResponse: PostPagination) {
   const parsed = postsResponse.results.map((post: Post) => {
     return {
       uid: post.uid,
-      first_publication_date: post.first_publication_date,
+      first_publication_date: format(
+        new Date(post.first_publication_date),
+        'dd MMM yyyy',
+        { locale: ptBR }
+      ),
       data: {
         title: post.data.title,
         subtitle: post.data.subtitle,
@@ -61,7 +67,7 @@ export default function Home({ results, next_page }: PostPagination) {
       </Head>
       <main className={`${commonStyles.container} ${styles.homeContainer}`}>
         {posts.map(result => (
-          <Link key={result.uid} href={`/posts/${result.uid}`}>
+          <Link key={result.uid} href={`/post/${result.uid}`}>
             <a>
               <h2>{result.data.title}</h2>
               <p>{result.data.subtitle}</p>
@@ -101,5 +107,6 @@ export const getStaticProps: GetStaticProps = async () => {
       results: results,
       next_page: postsResponse.next_page,
     },
+    revalidate: 60 * 60 * 48,
   };
 };
