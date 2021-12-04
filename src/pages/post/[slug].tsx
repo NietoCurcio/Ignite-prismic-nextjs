@@ -9,6 +9,8 @@ import { format } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
 import { FaRegClock } from 'react-icons/fa';
 import Prismic from '@prismicio/client';
+import { useRouter } from 'next/router';
+import React from 'react';
 
 interface Post {
   first_publication_date: string | null;
@@ -32,32 +34,44 @@ interface PostProps {
 }
 
 export default function Post({ post }: PostProps) {
+  const router = useRouter();
+
   return (
     <main className={styles.container}>
-      <img src={post.data.banner.url} alt={post.data.title} />
-      <article className={`${commonStyles.container} ${styles.article}`}>
-        <h1>{post.data.title}</h1>
-        <div>
-          <p>{post.first_publication_date}</p>
-          <p>{post.data.author}</p>
-          <p>
-            <FaRegClock /> 4 min
-          </p>
-        </div>
-        <div className={styles.content}>
-          {post.data.content.map(content => (
-            <>
-              <h2>{content.heading}</h2>
-              {content.body.map(paragraph => (
-                <>
-                  <p>{paragraph}</p>
-                  <br />
-                </>
+      {router.isFallback ? (
+        <h2>Carregando...</h2>
+      ) : (
+        <>
+          <img src={post.data.banner.url} alt={post.data.title} />
+          <article className={`${commonStyles.container} ${styles.article}`}>
+            <h1>{post.data.title}</h1>
+            <div>
+              <p>
+                {format(new Date(post.first_publication_date), 'dd MMM yyyy', {
+                  locale: ptBR,
+                })}
+              </p>
+              <p>{post.data.author}</p>
+              <p>
+                <FaRegClock /> 4 min
+              </p>
+            </div>
+            <div className={styles.content}>
+              {post.data.content.map(content => (
+                <React.Fragment key={content.heading}>
+                  <h2>{content.heading}</h2>
+                  {content.body.map((paragraph, idx) => (
+                    <React.Fragment key={idx}>
+                      <p>{paragraph.text}</p>
+                      <br />
+                    </React.Fragment>
+                  ))}
+                </React.Fragment>
               ))}
-            </>
-          ))}
-        </div>
-      </article>
+            </div>
+          </article>
+        </>
+      )}
     </main>
   );
 }
@@ -71,27 +85,29 @@ export const getStaticPaths: GetStaticPaths = async () => {
   const slugs = response.results.map(post => ({ params: { slug: post.uid } }));
   return {
     paths: slugs,
-    fallback: 'blocking',
+    fallback: true,
+    // o teste força a passar fallback true e fazer a aplicação ter um estado de "laoding"
+    // enquanto renderiza a pagina que nao foi gerada estaticamente
   };
 };
 
 export const getStaticProps: GetStaticProps = async ({ params: { slug } }) => {
   const prismic = getPrismicClient();
-  const response = await prismic.getByUID('posts', slug.toString(), {});
+  const response = await prismic.getByUID('posts', String(slug), {});
+
+  console.log(response.data.content);
 
   const post = {
-    first_publication_date: format(
-      new Date(response.first_publication_date),
-      'dd MMM yyyy',
-      { locale: ptBR }
-    ),
+    uid: response.uid,
+    first_publication_date: response.first_publication_date,
     data: {
+      subtitle: response.data.subtitle,
       title: response.data.title,
       author: response.data.author,
       banner: { url: response.data.banner.url },
       content: response.data.content.map(content => ({
         heading: content.heading,
-        body: content.body.map(paragraph => paragraph.text),
+        body: content.body,
       })),
     },
   };

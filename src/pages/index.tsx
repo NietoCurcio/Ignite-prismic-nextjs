@@ -34,11 +34,8 @@ function parseData(postsResponse: PostPagination) {
   const parsed = postsResponse.results.map((post: Post) => {
     return {
       uid: post.uid,
-      first_publication_date: format(
-        new Date(post.first_publication_date),
-        'dd MMM yyyy',
-        { locale: ptBR }
-      ),
+      first_publication_date: post.first_publication_date,
+      // o correto seria formatar a data aqui
       data: {
         title: post.data.title,
         subtitle: post.data.subtitle,
@@ -49,7 +46,9 @@ function parseData(postsResponse: PostPagination) {
   return parsed;
 }
 
-export default function Home({ results, next_page }: PostPagination) {
+export default function Home({
+  postsPagination: { results, next_page },
+}: HomeProps) {
   const [posts, setPosts] = useState<Post[]>(results);
   const [nextpage, setNextPage] = useState<string | null>(next_page);
 
@@ -66,22 +65,28 @@ export default function Home({ results, next_page }: PostPagination) {
         <title>Home | spacetravelling</title>
       </Head>
       <main className={`${commonStyles.container} ${styles.homeContainer}`}>
-        {posts.map(result => (
-          <Link key={result.uid} href={`/post/${result.uid}`}>
-            <a>
-              <h2>{result.data.title}</h2>
-              <p>{result.data.subtitle}</p>
-              <div>
-                <p>
-                  <FaRegCalendar /> {result.first_publication_date}
-                </p>
-                <p>
-                  <FaRegUser /> {result.data.author}
-                </p>
-              </div>
-            </a>
-          </Link>
-        ))}
+        {posts &&
+          posts.map(result => (
+            <Link key={result.uid} href={`/post/${result.uid}`}>
+              <a>
+                <h2>{result.data.title}</h2>
+                <p>{result.data.subtitle}</p>
+                <div>
+                  <p>
+                    <FaRegCalendar />{' '}
+                    {format(
+                      new Date(result.first_publication_date),
+                      'dd MMM yyyy',
+                      { locale: ptBR }
+                    )}
+                  </p>
+                  <p>
+                    <FaRegUser /> {result.data.author}
+                  </p>
+                </div>
+              </a>
+            </Link>
+          ))}
         {nextpage && (
           <button type="button" onClick={handleLoadPosts}>
             Carregar mais posts
@@ -101,11 +106,14 @@ export const getStaticProps: GetStaticProps = async () => {
   );
 
   const results = parseData(postsResponse);
+  // infelizmente o teste força a passar a data não formatada :/
 
   return {
     props: {
-      results: results,
-      next_page: postsResponse.next_page,
+      postsPagination: {
+        results: results,
+        next_page: postsResponse.next_page,
+      },
     },
     revalidate: 60 * 60 * 48,
   };
