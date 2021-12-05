@@ -15,13 +15,20 @@
     }
 
     h1 + div {
-      display: flex;
-      gap: 1rem;
-      align-items: center;
-
-      p:last-child {
+      > div {
         display: flex;
+        gap: 1rem;
         align-items: center;
+
+        p:last-child {
+          display: flex;
+          align-items: center;
+        }
+      }
+
+      > p {
+        font-style: italic;
+        padding-top: 1rem;
       }
     }
 

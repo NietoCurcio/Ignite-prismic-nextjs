@@ -5,7 +5,7 @@ import { getPrismicClient } from '../../services/prismic';
 import commonStyles from '../../styles/common.module.scss';
 import styles from './post.module.scss';
 
-import { format } from 'date-fns';
+import { format, getHours, getMinutes } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
 import { FaRegClock } from 'react-icons/fa';
 import Prismic from '@prismicio/client';
@@ -52,28 +52,43 @@ export default function Post({ post, preview, prev, next }: PostProps) {
           <article className={`${commonStyles.container} ${styles.article}`}>
             <h1>{post.data.title}</h1>
             <div>
+              <div>
+                <p>
+                  {format(
+                    new Date(post.first_publication_date),
+                    'dd MMM yyyy',
+                    {
+                      locale: ptBR,
+                    }
+                  )}
+                </p>
+                <p>{post.data.author}</p>
+                <p>
+                  <FaRegClock />{' '}
+                  {Math.ceil(
+                    post.data.content.reduce((total, content) => {
+                      total += content.body.reduce(
+                        (total, paragraph) =>
+                          (total += paragraph.text.match(/\S+\s*/g).length),
+                        0
+                      );
+                      return total;
+                    }, 0) / 200
+                  )}{' '}
+                  {/* count the number of words in post and divide by 200 */}
+                  min
+                </p>
+              </div>
               <p>
-                {format(new Date(post.first_publication_date), 'dd MMM yyyy', {
+                * editado{' '}
+                {format(new Date(post.last_publication_date), 'dd MMM yyyy', {
+                  locale: ptBR,
+                })}
+                , às{' '}
+                {format(new Date(post.last_publication_date), 'HH:mm', {
                   locale: ptBR,
                 })}
               </p>
-              <p>{post.data.author}</p>
-              <p>
-                <FaRegClock />{' '}
-                {Math.ceil(
-                  post.data.content.reduce((total, content) => {
-                    total += content.body.reduce(
-                      (total, paragraph) =>
-                        (total += paragraph.text.match(/\S+\s*/g).length),
-                      0
-                    );
-                    return total;
-                  }, 0) / 200
-                )}{' '}
-                {/* count the number of words in post and divide by 200 */}
-                min
-              </p>
-              <p>* editado {post.last_publication_date}</p>
             </div>
             <div className={styles.content}>
               {post.data.content.map(content => (
