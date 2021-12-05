@@ -15,6 +15,7 @@ import Utteranc from '../../components/Utteranc';
 import Link from 'next/link';
 
 interface Post {
+  last_publication_date: string | null;
   first_publication_date: string | null;
   data: {
     title: string;
@@ -34,9 +35,11 @@ interface Post {
 interface PostProps {
   post: Post;
   preview: boolean;
+  prev: any;
+  next: any;
 }
 
-export default function Post({ post, preview }: PostProps) {
+export default function Post({ post, preview, prev, next }: PostProps) {
   const router = useRouter();
 
   return (
@@ -70,6 +73,7 @@ export default function Post({ post, preview }: PostProps) {
                 {/* count the number of words in post and divide by 200 */}
                 min
               </p>
+              <p>* editado {post.last_publication_date}</p>
             </div>
             <div className={styles.content}>
               {post.data.content.map(content => (
@@ -87,14 +91,22 @@ export default function Post({ post, preview }: PostProps) {
           </article>
           <footer className={`${commonStyles.container} ${styles.footer}`}>
             <div>
-              <div>
-                <h3>Como utilizar hooks</h3>
-                <a>Post anterior</a>
-              </div>
-              <div>
-                <h3>Criando um app CRA do zero</h3>
-                <a>Próximo post</a>
-              </div>
+              {prev && (
+                <div>
+                  <h3>{prev.data.title}</h3>
+                  <Link href={`/post/${prev.uid}`}>
+                    <a>Post anterior</a>
+                  </Link>
+                </div>
+              )}
+              {next && (
+                <div>
+                  <h3>{next.data.title}</h3>
+                  <Link href={`/post/${next.uid}`}>
+                    <a>Próximo post</a>
+                  </Link>
+                </div>
+              )}
             </div>
             <div className={styles.comments}>
               <Utteranc />
@@ -138,9 +150,26 @@ export const getStaticProps: GetStaticProps<PostProps> = async ({
     ref: previewData?.ref ?? null,
   });
 
+  const next = await prismic.queryFirst(
+    [Prismic.predicates.at('document.type', 'posts')],
+    {
+      after: response.id,
+      orderings: '[document.first_publication_date]',
+    }
+  );
+
+  const prev = await prismic.queryFirst(
+    [Prismic.predicates.at('document.type', 'posts')],
+    {
+      after: response.id,
+      orderings: '[document.first_publication_date desc]',
+    }
+  );
+
   const post = {
     uid: response.uid,
     first_publication_date: response.first_publication_date,
+    last_publication_date: response.last_publication_date,
     data: {
       subtitle: response.data.subtitle,
       title: response.data.title,
@@ -154,7 +183,7 @@ export const getStaticProps: GetStaticProps<PostProps> = async ({
   };
 
   return {
-    props: { post, preview },
+    props: { post, preview, prev: prev ?? null, next: next ?? null },
     revalidate: 60 * 60 * 48,
   };
 };
