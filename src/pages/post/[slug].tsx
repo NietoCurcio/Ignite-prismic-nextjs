@@ -11,6 +11,8 @@ import { FaRegClock } from 'react-icons/fa';
 import Prismic from '@prismicio/client';
 import { useRouter } from 'next/router';
 import React from 'react';
+import Utteranc from '../../components/Utteranc';
+import Link from 'next/link';
 
 interface Post {
   first_publication_date: string | null;
@@ -31,9 +33,10 @@ interface Post {
 
 interface PostProps {
   post: Post;
+  preview: boolean;
 }
 
-export default function Post({ post }: PostProps) {
+export default function Post({ post, preview }: PostProps) {
   const router = useRouter();
 
   return (
@@ -82,6 +85,28 @@ export default function Post({ post }: PostProps) {
               ))}
             </div>
           </article>
+          <footer className={`${commonStyles.container} ${styles.footer}`}>
+            <div>
+              <div>
+                <h3>Como utilizar hooks</h3>
+                <a>Post anterior</a>
+              </div>
+              <div>
+                <h3>Criando um app CRA do zero</h3>
+                <a>Próximo post</a>
+              </div>
+            </div>
+            <div className={styles.comments}>
+              <Utteranc />
+            </div>
+            {preview && (
+              <aside>
+                <Link href="/api/exit-preview">
+                  <a>Sair do modo Preview</a>
+                </Link>
+              </aside>
+            )}
+          </footer>
         </>
       )}
     </main>
@@ -103,9 +128,15 @@ export const getStaticPaths: GetStaticPaths = async () => {
   };
 };
 
-export const getStaticProps: GetStaticProps = async ({ params: { slug } }) => {
+export const getStaticProps: GetStaticProps<PostProps> = async ({
+  params: { slug },
+  preview = false,
+  previewData,
+}) => {
   const prismic = getPrismicClient();
-  const response = await prismic.getByUID('posts', String(slug), {});
+  const response = await prismic.getByUID('posts', String(slug), {
+    ref: previewData?.ref ?? null,
+  });
 
   const post = {
     uid: response.uid,
@@ -123,7 +154,7 @@ export const getStaticProps: GetStaticProps = async ({ params: { slug } }) => {
   };
 
   return {
-    props: { post },
+    props: { post, preview },
     revalidate: 60 * 60 * 48,
   };
 };
